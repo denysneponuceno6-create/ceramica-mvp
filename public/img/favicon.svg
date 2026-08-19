@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="fFundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2A2422"/>
+      <stop offset="1" stop-color="#12100F"/>
+    </linearGradient>
+    <linearGradient id="fBarro" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F0793A"/>
+      <stop offset="1" stop-color="#A8390F"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#fFundo)"/>
+  <rect x="12" y="13" width="18" height="11" rx="2" fill="url(#fBarro)"/>
+  <rect x="34" y="13" width="18" height="11" rx="2" fill="#B8430F"/>
+  <rect x="7"  y="27" width="13" height="11" rx="2" fill="#B8430F"/>
+  <rect x="24" y="27" width="18" height="11" rx="2" fill="url(#fBarro)"/>
+  <rect x="46" y="27" width="11" height="11" rx="2" fill="#B8430F"/>
+  <rect x="12" y="41" width="18" height="11" rx="2" fill="#B8430F"/>
+  <rect x="34" y="41" width="18" height="11" rx="2" fill="url(#fBarro)"/>
+</svg>

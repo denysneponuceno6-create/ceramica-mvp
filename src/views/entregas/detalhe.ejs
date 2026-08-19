@@ -1,0 +1,271 @@
+<%- include('../partials/cabeca') %>
+
+<%
+  // ---- Mensagem pronta para o cliente, conforme a situação da entrega ----
+  // Escrita aqui, no servidor, e editável pelo funcionário antes de enviar.
+  var nomeCurto = String(entrega.cliente || '').split(' ')[0];
+  var mensagens = {
+    pendente: 'Olá, ' + nomeCurto + '! Aqui é da Cerâmica Betim. '
+      + 'A entrega do seu pedido #' + entrega.pedido_id + ' está programada para ' + f.data(entrega.data_prevista) + ', '
+      + 'no endereço: ' + entrega.endereco + '. Qualquer dúvida, é só responder por aqui.',
+    em_rota: 'Olá, ' + nomeCurto + '! Aqui é da Cerâmica Betim. '
+      + 'Seu pedido #' + entrega.pedido_id + ' saiu para entrega e está a caminho de: ' + entrega.endereco + '. '
+      + (entrega.motorista ? 'O motorista é o ' + entrega.motorista + '. ' : '')
+      + 'Por favor, deixe alguém no local para receber.',
+    entregue: 'Olá, ' + nomeCurto + '! Aqui é da Cerâmica Betim. '
+      + 'Confirmamos a entrega do seu pedido #' + entrega.pedido_id + ' em ' + f.dataHora(entrega.data_entrega) + ', '
+      + 'no endereço: ' + entrega.endereco + '. Obrigado pela preferência!',
+    falha: 'Olá, ' + nomeCurto + '! Aqui é da Cerâmica Betim. '
+      + 'Não conseguimos concluir a entrega do seu pedido #' + entrega.pedido_id + ' hoje. '
+      + 'Podemos combinar uma nova data?',
+  };
+  var mensagemZap = mensagens[entrega.status] || mensagens.pendente;
+  var numeroZap = String(entrega.telefone || '').replace(/\D/g, '');
+  var linkZap = f.whatsapp(entrega.telefone, mensagemZap);
+  var linkTel = f.ligar(entrega.telefone);
+  var linkMapa = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(entrega.endereco || '');
+%>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Entrega #<%= entrega.id %></p>
+    <h1><%= entrega.cliente %></h1>
+    <p class="subtitulo">
+      Pedido <a href="/pedidos/<%= entrega.pedido_id %>">#<%= entrega.pedido_id %></a>
+      &middot; <%= f.dinheiro(entrega.valor_total) %>
+    </p>
+  </div>
+  <div class="acoes"><a class="btn" href="/entregas">Voltar para entregas</a></div>
+</div>
+
+<!-- =================== Situação e ação principal =================== -->
+<section class="cartao">
+  <header>
+    <h2>Situação da entrega</h2>
+    <div class="acoes"><span class="tag tag-g tag-<%= entrega.status %>"><%= d.ROTULO_STATUS_ENTREGA[entrega.status] %></span></div>
+  </header>
+
+  <div class="corpo">
+    <div class="dados">
+      <div class="dado">
+        <div class="rotulo">Data prevista</div>
+        <div class="valor"><%= f.data(entrega.data_prevista) %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Saída para a rota</div>
+        <div class="valor <%= entrega.data_saida ? '' : 'indefinido' %>"><%= entrega.data_saida ? f.dataHora(entrega.data_saida) : 'Ainda não saiu' %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Entregue em</div>
+        <div class="valor <%= entrega.data_entrega ? '' : 'indefinido' %>"><%= entrega.data_entrega ? f.dataHora(entrega.data_entrega) : 'Aguardando confirmação' %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Veículo</div>
+        <div class="valor <%= entrega.placa ? '' : 'indefinido' %>"><%= entrega.placa ? entrega.placa + ' — ' + entrega.modelo : 'A definir' %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Motorista</div>
+        <div class="valor <%= entrega.motorista ? '' : 'indefinido' %>"><%= entrega.motorista || 'A definir' %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Telefone do cliente</div>
+        <div class="valor">
+          <div class="contato">
+            <span><%= f.telefone(entrega.telefone) %></span>
+            <% if (linkTel) { %>
+              <a class="btn btn-pequeno" href="<%= linkTel %>"><svg class="i i-p"><use href="#ic-telefone"/></svg>Ligar</a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="dado largo">
+        <div class="rotulo">Endereço de entrega</div>
+        <div class="valor">
+          <div class="contato">
+            <span><%= entrega.endereco %></span>
+            <a class="btn btn-pequeno" href="<%= linkMapa %>" target="_blank" rel="noopener">
+              <svg class="i i-p"><use href="#ic-local"/></svg>Abrir no mapa
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# A ação certa para o momento fica sozinha, grande e no fim do cartão:
+      no celular é o que o motorista alcança com o polegar. %>
+  <% if (pode('entregas:editar') && entrega.status !== 'entregue') { %>
+    <% if (entrega.status === 'pendente' && entrega.veiculo_id) { %>
+      <div class="acao-principal">
+        <div>
+          <div class="titulo-acao">Próximo passo: colocar a entrega em rota</div>
+          <p class="subtitulo">O pedido passa para "Em rota" e o veículo fica ocupado.</p>
+        </div>
+        <form method="post" action="/entregas/<%= entrega.id %>/status">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <input type="hidden" name="status" value="em_rota">
+          <button type="submit" class="btn btn-primario btn-largo" data-carregando="Iniciando rota...">
+            <svg class="i"><use href="#ic-frota"/></svg>Iniciar rota
+          </button>
+        </form>
+      </div>
+    <% } else if (entrega.status === 'pendente') { %>
+      <div class="acao-principal">
+        <div>
+          <div class="titulo-acao">Falta definir o veículo</div>
+          <p class="subtitulo">Escolha o veículo no formulário abaixo para liberar o início da rota.</p>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (entrega.status === 'em_rota') { %>
+      <div class="acao-principal">
+        <div>
+          <div class="titulo-acao">Chegou ao cliente?</div>
+          <p class="subtitulo">Confirme a entrega para finalizar o pedido e liberar o veículo.</p>
+        </div>
+        <form method="post" action="/entregas/<%= entrega.id %>/status">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <input type="hidden" name="status" value="entregue">
+          <button type="submit" class="btn btn-sucesso btn-largo" data-carregando="Confirmando entrega...">
+            <svg class="i"><use href="#ic-ok"/></svg>Confirmar entrega
+          </button>
+        </form>
+      </div>
+    <% } %>
+
+    <% if (entrega.status !== 'falha') { %>
+      <div class="corpo">
+        <div class="grupo-botoes">
+          <form method="post" action="/entregas/<%= entrega.id %>/status">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <input type="hidden" name="status" value="falha">
+            <button type="submit" class="btn btn-perigo"
+                    data-confirmar="Registrar que esta entrega teve um problema?"
+                    data-carregando="Registrando...">
+              <svg class="i i-p"><use href="#ic-atencao"/></svg>Registrar problema na entrega
+            </button>
+          </form>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+
+  <% if (entrega.status === 'entregue') { %>
+    <div class="acao-principal concluida">
+      <div>
+        <div class="titulo-acao">Entrega confirmada com sucesso.</div>
+        <p class="subtitulo">Registrada em <%= f.dataHora(entrega.data_entrega) %>. O pedido foi finalizado.</p>
+      </div>
+    </div>
+  <% } %>
+</section>
+
+<!-- ======================= Aviso pelo WhatsApp ======================= -->
+<% if (linkZap) { %>
+<section class="cartao">
+  <header>
+    <div>
+      <h2>Avisar o cliente pelo WhatsApp</h2>
+      <p class="subtitulo">A mensagem já vem escrita. Revise se quiser e envie.</p>
+    </div>
+  </header>
+  <div class="corpo">
+    <div class="campo">
+      <label for="mensagem-whatsapp">
+        Mensagem para <%= entrega.cliente %>
+        <span class="ajuda">— <%= f.telefone(entrega.telefone) %></span>
+      </label>
+      <textarea id="mensagem-whatsapp" rows="5"><%= mensagemZap %></textarea>
+    </div>
+    <div class="acoes-form sem-linha">
+      <a class="btn btn-whatsapp btn-largo"
+         href="<%= linkZap %>"
+         target="_blank" rel="noopener"
+         data-whatsapp="<%= numeroZap %>"
+         data-mensagem-de="mensagem-whatsapp">
+        <svg class="i"><use href="#ic-whatsapp"/></svg>Enviar mensagem pelo WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- ================== Veículo, motorista e data ==================== -->
+<% if (pode('entregas:editar') && entrega.status !== 'entregue') { %>
+<section class="cartao">
+  <header><h2>Veículo, motorista e data</h2></header>
+  <div class="corpo">
+    <form method="post" action="/entregas/<%= entrega.id %>/atribuir">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="campos">
+        <div class="campo">
+          <label for="veiculo_id">Veículo</label>
+          <select id="veiculo_id" name="veiculo_id">
+            <option value="">A definir</option>
+            <% veiculos.forEach(function (v) { %>
+              <option value="<%= v.id %>" <%= entrega.veiculo_id === v.id ? 'selected' : '' %>><%= v.placa %> &middot; <%= v.modelo %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="motorista">Motorista</label>
+          <input type="text" id="motorista" name="motorista" value="<%= entrega.motorista || '' %>" maxlength="120" placeholder="Nome de quem vai dirigir">
+        </div>
+        <div class="campo">
+          <label for="data_prevista">Data prevista</label>
+          <input type="date" id="data_prevista" name="data_prevista" value="<%= f.dataInput(entrega.data_prevista) %>" required>
+        </div>
+      </div>
+      <div class="acoes-form">
+        <button type="submit" class="btn btn-primario" data-carregando="Salvando...">Salvar dados da entrega</button>
+      </div>
+    </form>
+  </div>
+</section>
+<% } %>
+
+<!-- ========================== Ocorrências =========================== -->
+<section class="cartao">
+  <header>
+    <div>
+      <h2>Ocorrências</h2>
+      <p class="subtitulo">O que aconteceu de diferente durante esta entrega.</p>
+    </div>
+  </header>
+  <% if (pode('entregas:editar')) { %>
+  <div class="corpo">
+    <form method="post" action="/entregas/<%= entrega.id %>/ocorrencia">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="campo">
+        <label for="descricao">Registrar uma ocorrência</label>
+        <textarea id="descricao" name="descricao" required minlength="5" maxlength="500"
+                  placeholder="Exemplos: cliente ausente, rua sem acesso para o caminhão, carga avariada"></textarea>
+      </div>
+      <div class="acoes-form sem-linha">
+        <button type="submit" class="btn" data-carregando="Registrando...">Registrar ocorrência</button>
+      </div>
+    </form>
+  </div>
+  <% } %>
+  <% if (!ocorrencias.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-auditoria"/></svg>
+      <b>Nenhuma ocorrência registrada</b>
+      <p>Correu tudo bem até aqui.</p>
+    </div>
+  <% } else { %>
+  <ul class="lista-simples">
+    <% ocorrencias.forEach(function (o) { %>
+    <li>
+      <div class="principal">
+        <b><%= o.descricao %></b>
+        <small><%= f.dataHora(o.criado_em) %> &middot; registrada por <%= o.usuario || 'sistema' %></small>
+      </div>
+    </li>
+    <% }) %>
+  </ul>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

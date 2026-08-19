@@ -1,0 +1,55 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Cadastro</p>
+    <h1>Clientes</h1>
+  </div>
+  <div class="acoes">
+    <% if (pode('clientes:editar')) { %><a class="btn btn-primario" href="/clientes/novo"><svg class="i i-p"><use href="#ic-mais"/></svg>Novo cliente</a><% } %>
+  </div>
+</div>
+
+<section class="cartao">
+  <header>
+    <form method="get" action="/clientes" class="barra-filtro largura-total">
+      <input type="search" name="busca" value="<%= busca %>" placeholder="Buscar por nome, telefone ou cidade" maxlength="80" aria-label="Buscar clientes">
+      <button type="submit" class="btn">Buscar</button>
+      <% if (busca) { %><a class="btn" href="/clientes">Limpar busca</a><% } %>
+    </form>
+  </header>
+
+  <% if (!clientes.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-clientes"/></svg>
+      <b><%= busca ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado' %></b>
+      <p><%= busca ? 'Tente outro nome, telefone ou cidade.' : 'Cadastre o primeiro cliente para começar a registrar pedidos.' %></p>
+      <% if (pode('clientes:editar') && !busca) { %><a class="btn btn-primario" href="/clientes/novo">Cadastrar cliente</a><% } %>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr><th>Nome</th><th>Telefone</th><th>Cidade</th><th class="num">Pedidos</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% clientes.forEach(function (c) { %>
+        <tr>
+          <td class="destaque">
+            <a href="/clientes/<%= c.id %>"><%= c.nome %></a>
+            <% if (!c.ativo) { %> <span class="tag tag-inativo">Inativo</span><% } %>
+          </td>
+          <td data-rotulo="Telefone" class="compacto"><%= f.telefone(c.telefone) %></td>
+          <td data-rotulo="Cidade"><%= c.cidade || 'Não informada' %></td>
+          <td data-rotulo="Pedidos" class="num"><%= f.numero(c.total_pedidos) %></td>
+          <td class="acao compacto"><a class="btn btn-pequeno" href="/clientes/<%= c.id %>">Ver cliente</a></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/paginacao') %>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

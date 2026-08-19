@@ -1,0 +1,102 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Logística</p>
+    <h1>Frota de veículos</h1>
+    <p class="subtitulo">O veículo fica "Em rota" enquanto tiver entrega em andamento.</p>
+  </div>
+</div>
+
+<section class="cartao">
+  <header><h2>Veículos cadastrados</h2></header>
+  <% if (!veiculos.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-frota"/></svg>
+      <b>Nenhum veículo cadastrado</b>
+      <p>Cadastre os caminhões da empresa para poder atribuí-los às entregas.</p>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr>
+          <th>Placa e modelo</th>
+          <th class="num">Capacidade</th>
+          <th>Status</th>
+          <th class="num">Em rota</th>
+          <th class="num">Entregas feitas</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% veiculos.forEach(function (v) { %>
+        <tr>
+          <td class="destaque">
+            <span class="celula">
+              <span class="mono"><%= v.placa %></span>
+              <small><%= v.modelo %></small>
+            </span>
+          </td>
+          <td data-rotulo="Capacidade" class="num"><%= f.numero(v.capacidade) %> kg</td>
+          <td data-rotulo="Status"><span class="tag tag-<%= v.status %>"><%= d.ROTULO_STATUS_VEICULO[v.status] %></span></td>
+          <td data-rotulo="Em rota" class="num"><%= v.entregas_rota %></td>
+          <td data-rotulo="Entregas feitas" class="num"><%= v.entregas_feitas %></td>
+          <td class="acao compacto">
+            <% if (pode('frota:editar')) { %>
+            <form method="post" action="/frota/<%= v.id %>/status" class="barra-filtro">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <select name="status" aria-label="Novo status do veículo <%= v.placa %>" class="col-status">
+                <% d.STATUS_VEICULO.forEach(function (s) { %>
+                  <option value="<%= s %>" <%= v.status === s ? 'selected' : '' %>><%= d.ROTULO_STATUS_VEICULO[s] %></option>
+                <% }) %>
+              </select>
+              <button type="submit" class="btn btn-pequeno" data-carregando="Salvando...">Salvar status</button>
+            </form>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<% if (pode('frota:editar')) { %>
+<section class="cartao">
+  <header><h2>Cadastrar veículo</h2></header>
+  <div class="corpo">
+    <form method="post" action="/frota">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="campos">
+        <div class="campo">
+          <label for="placa">Placa</label>
+          <input type="text" id="placa" name="placa" value="<%= veiculo.placa || '' %>" required maxlength="8" placeholder="ABC1D23" class="caixa-alta">
+        </div>
+        <div class="campo">
+          <label for="modelo">Modelo</label>
+          <input type="text" id="modelo" name="modelo" value="<%= veiculo.modelo || '' %>" required minlength="3" maxlength="120" placeholder="Caminhão truck, carroceria">
+        </div>
+        <div class="campo">
+          <label for="capacidade">Capacidade de carga (kg)</label>
+          <input type="number" id="capacidade" name="capacidade" value="<%= veiculo.capacidade || 0 %>" min="0" step="1" required>
+        </div>
+        <div class="campo">
+          <label for="status">Status inicial</label>
+          <select id="status" name="status" required>
+            <% d.STATUS_VEICULO.forEach(function (s) { %>
+              <option value="<%= s %>" <%= veiculo.status === s ? 'selected' : '' %>><%= d.ROTULO_STATUS_VEICULO[s] %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+      <div class="acoes-form">
+        <button type="submit" class="btn btn-primario" data-carregando="Cadastrando...">Cadastrar veículo</button>
+      </div>
+    </form>
+  </div>
+</section>
+<% } %>
+
+<%- include('../partials/rodape') %>

@@ -1,0 +1,66 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Administração</p>
+    <h1>Usuários e perfis</h1>
+    <p class="subtitulo">Quem pode entrar no sistema e o que cada um pode fazer.</p>
+  </div>
+  <div class="acoes"><a class="btn btn-primario" href="/usuarios/novo"><svg class="i i-p"><use href="#ic-mais"/></svg>Novo usuário</a></div>
+</div>
+
+<section class="cartao">
+  <header><h2>Usuários cadastrados</h2></header>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Situação</th><th>Último acesso</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% usuarios.forEach(function (u) { %>
+        <tr>
+          <td class="destaque"><%= u.nome %></td>
+          <td data-rotulo="E-mail" class="mono"><%= u.email %></td>
+          <td data-rotulo="Perfil"><span class="tag tag-perfil"><%= d.ROTULO_PERFIL[u.perfil] %></span></td>
+          <td data-rotulo="Situação">
+            <% if (u.ativo) { %>
+              <span class="tag tag-disponivel">Ativo</span>
+            <% } else { %>
+              <span class="tag tag-inativo">Inativo</span>
+            <% } %>
+          </td>
+          <td data-rotulo="Último acesso" class="compacto"><%= u.ultimo_login ? f.dataHora(u.ultimo_login) : 'Nunca entrou' %></td>
+          <td class="acao compacto"><a class="btn btn-pequeno" href="/usuarios/<%= u.id %>/editar">Editar usuário</a></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="cartao">
+  <header>
+    <div>
+      <h2>O que cada perfil pode fazer</h2>
+      <p class="subtitulo">As permissões são verificadas no servidor a cada requisição.</p>
+    </div>
+  </header>
+  <div class="corpo">
+    <div class="dados">
+      <% Object.keys(permissoes).forEach(function (perfil) { %>
+      <div class="dado">
+        <div class="rotulo"><%= d.ROTULO_PERFIL[perfil] %></div>
+        <div class="valor texto-menor">
+          <% if (permissoes[perfil][0] === '*') { %>
+            Acesso total ao sistema, incluindo usuários e auditoria.
+          <% } else { %>
+            <%= permissoes[perfil].join(', ') %>
+          <% } %>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/rodape') %>

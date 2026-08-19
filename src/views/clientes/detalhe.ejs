@@ -1,0 +1,119 @@
+<%- include('../partials/cabeca') %>
+
+<%
+  var linkTelCliente = f.ligar(cliente.telefone);
+  var linkZapCliente = f.whatsapp(cliente.telefone,
+    'Olá, ' + String(cliente.nome || '').split(' ')[0] + '! Aqui é da Cerâmica Betim.');
+  var linkMapaCliente = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(cliente.endereco || '');
+%>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Cliente</p>
+    <h1><%= cliente.nome %></h1>
+    <p class="subtitulo">
+      <%= f.telefone(cliente.telefone) %> &middot; <%= cliente.cidade || 'cidade não informada' %>
+      <% if (!cliente.ativo) { %> &middot; <span class="tag tag-inativo">Inativo</span><% } %>
+    </p>
+  </div>
+  <div class="acoes">
+    <% if (pode('clientes:editar')) { %><a class="btn" href="/clientes/<%= cliente.id %>/editar">Editar cadastro</a><% } %>
+    <% if (pode('pedidos:editar')) { %><a class="btn btn-primario" href="/pedidos/novo">Novo pedido</a><% } %>
+    <a class="btn" href="/clientes">Voltar para clientes</a>
+  </div>
+</div>
+
+<div class="indicadores">
+  <div class="kpi marca">
+    <div class="rotulo"><svg class="i"><use href="#ic-pedidos"/></svg>Pedidos no total</div>
+    <div class="valor"><%= f.numero(resumo.total) %></div>
+  </div>
+  <div class="kpi <%= resumo.abertos > 0 ? 'atencao' : 'bom' %>">
+    <div class="rotulo"><svg class="i"><use href="#ic-relogio"/></svg>Pedidos em aberto</div>
+    <div class="valor"><%= f.numero(resumo.abertos) %></div>
+  </div>
+  <div class="kpi">
+    <div class="rotulo"><svg class="i"><use href="#ic-dinheiro"/></svg>Valor acumulado</div>
+    <div class="valor moeda"><%= f.dinheiro(resumo.valor) %></div>
+  </div>
+</div>
+
+<section class="cartao">
+  <header><h2>Dados cadastrais</h2></header>
+  <div class="corpo">
+    <div class="dados">
+      <div class="dado">
+        <div class="rotulo">Telefone</div>
+        <div class="valor">
+          <div class="contato">
+            <span><%= f.telefone(cliente.telefone) %></span>
+            <% if (linkTelCliente) { %>
+              <a class="btn btn-pequeno" href="<%= linkTelCliente %>"><svg class="i i-p"><use href="#ic-telefone"/></svg>Ligar</a>
+            <% } %>
+            <% if (linkZapCliente) { %>
+              <a class="btn btn-pequeno btn-whatsapp" href="<%= linkZapCliente %>" target="_blank" rel="noopener">
+                <svg class="i i-p"><use href="#ic-whatsapp"/></svg>WhatsApp
+              </a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Cidade</div>
+        <div class="valor <%= cliente.cidade ? '' : 'indefinido' %>"><%= cliente.cidade || 'Não informada' %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Situação</div>
+        <div class="valor"><%= cliente.ativo ? 'Ativo' : 'Inativo' %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Cadastrado em</div>
+        <div class="valor"><%= f.dataHora(cliente.criado_em) %></div>
+      </div>
+      <div class="dado largo">
+        <div class="rotulo">Endereço de entrega</div>
+        <div class="valor">
+          <div class="contato">
+            <span><%= cliente.endereco %></span>
+            <a class="btn btn-pequeno" href="<%= linkMapaCliente %>" target="_blank" rel="noopener">
+              <svg class="i i-p"><use href="#ic-local"/></svg>Abrir no mapa
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cartao">
+  <header><h2>Histórico de pedidos</h2></header>
+  <% if (!pedidos.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-pedidos"/></svg>
+      <b>Este cliente ainda não tem pedidos</b>
+      <p>Registre o primeiro pedido para acompanhar o histórico aqui.</p>
+      <% if (pode('pedidos:editar')) { %><a class="btn btn-primario" href="/pedidos/novo">Criar pedido</a><% } %>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr><th>Pedido</th><th>Data do pedido</th><th>Entrega prevista</th><th>Status</th><th class="num">Valor</th></tr>
+      </thead>
+      <tbody>
+        <% pedidos.forEach(function (p) { %>
+        <tr>
+          <td class="destaque"><a href="/pedidos/<%= p.id %>">Pedido #<%= p.id %></a></td>
+          <td data-rotulo="Data do pedido" class="compacto"><%= f.data(p.data_pedido) %></td>
+          <td data-rotulo="Entrega prevista" class="compacto"><%= f.data(p.data_entrega) %></td>
+          <td data-rotulo="Status"><span class="tag tag-<%= p.status %>"><%= d.ROTULO_STATUS_PEDIDO[p.status] %></span></td>
+          <td data-rotulo="Valor" class="num"><%= f.dinheiro(p.valor_total) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

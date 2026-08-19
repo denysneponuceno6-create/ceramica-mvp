@@ -1,0 +1,10 @@
+<%# Fiada compacta: mostra em que etapa do fluxo o pedido está. %>
+<% var idx = d.ESTEIRA.indexOf(status); %>
+<div class="trilha <%= status === 'cancelado' ? 'cancelada' : '' %>"
+     role="img"
+     aria-label="Etapa do pedido: <%= d.ROTULO_STATUS_PEDIDO[status] %>"
+     title="<%= d.ROTULO_STATUS_PEDIDO[status] %>">
+  <% d.ESTEIRA.forEach(function (etapa, i) { %>
+    <span class="<%= (idx >= 0 && i < idx) ? 'feito' : ((idx === i) ? 'atual' : '') %>"></span>
+  <% }) %>
+</div>

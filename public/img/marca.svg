@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="132" height="104" viewBox="0 0 132 104" role="img" aria-label="Cerâmica Betim">
+  <defs>
+    <linearGradient id="mBarro" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F0793A"/>
+      <stop offset="1" stop-color="#A8390F"/>
+    </linearGradient>
+    <linearGradient id="mBarro2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D4551D"/>
+      <stop offset="1" stop-color="#8C2F0C"/>
+    </linearGradient>
+    <linearGradient id="mBrasa" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#FFB06A"/>
+      <stop offset="1" stop-color="#FF7A2E" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- fiada de cima -->
+  <rect x="12"  y="10" width="50" height="26" rx="3" fill="url(#mBarro)"/>
+  <rect x="68"  y="10" width="50" height="26" rx="3" fill="url(#mBarro2)"/>
+  <!-- fiada do meio, desencontrada -->
+  <rect x="0"   y="40" width="36" height="26" rx="3" fill="url(#mBarro2)"/>
+  <rect x="42"  y="40" width="50" height="26" rx="3" fill="url(#mBarro)"/>
+  <rect x="98"  y="40" width="34" height="26" rx="3" fill="url(#mBarro2)"/>
+  <!-- fiada de baixo -->
+  <rect x="12"  y="70" width="50" height="26" rx="3" fill="url(#mBarro2)"/>
+  <rect x="68"  y="70" width="50" height="26" rx="3" fill="url(#mBarro)"/>
+
+  <!-- brilho de forno subindo pelas juntas -->
+  <rect x="12" y="10" width="50" height="3" rx="1.5" fill="#FFC08A" opacity=".55"/>
+  <rect x="42" y="40" width="50" height="3" rx="1.5" fill="#FFC08A" opacity=".38"/>
+  <rect x="68" y="70" width="50" height="3" rx="1.5" fill="#FFC08A" opacity=".28"/>
+  <rect x="0" y="98" width="132" height="6" rx="3" fill="url(#mBrasa)" opacity=".5"/>
+</svg>

@@ -1,0 +1,23 @@
+<% if (typeof ok !== 'undefined' && ok) { %>
+  <div class="aviso aviso-ok" role="status">
+    <svg class="i"><use href="#ic-ok"/></svg>
+    <span class="texto-aviso"><%= ok %></span>
+    <button type="button" class="fechar" data-fecha-aviso aria-label="Fechar aviso"><svg class="i i-p"><use href="#ic-fechar"/></svg></button>
+  </div>
+<% } %>
+<% if (typeof err !== 'undefined' && err) { %>
+  <div class="aviso aviso-erro" role="alert">
+    <svg class="i"><use href="#ic-erro"/></svg>
+    <span class="texto-aviso"><%= err %></span>
+    <button type="button" class="fechar" data-fecha-aviso aria-label="Fechar aviso"><svg class="i i-p"><use href="#ic-fechar"/></svg></button>
+  </div>
+<% } %>
+<% if (typeof erros !== 'undefined' && erros && erros.length) { %>
+  <div class="aviso aviso-erro" role="alert">
+    <svg class="i"><use href="#ic-erro"/></svg>
+    <div class="texto-aviso">
+      <b>Corrija estes pontos antes de salvar:</b>
+      <ul><% erros.forEach(function (e) { %><li><%= e %></li><% }) %></ul>
+    </div>
+  </div>
+<% } %>

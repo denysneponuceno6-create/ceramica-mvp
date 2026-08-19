@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json.bak
+
+# Ambiente / segredos  (NUNCA versionar)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Logs e temporarios
+logs/
+*.log
+tmp/
+.cache/
+coverage/
+
+# Sistema operacional / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

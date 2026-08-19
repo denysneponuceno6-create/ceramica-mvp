@@ -1,0 +1,50 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow"><%= cliente.id ? 'Editar cadastro' : 'Novo cadastro' %></p>
+    <h1><%= titulo %></h1>
+  </div>
+  <div class="acoes">
+    <a class="btn" href="<%= cliente.id ? '/clientes/' + cliente.id : '/clientes' %>">Voltar</a>
+  </div>
+</div>
+
+<section class="cartao">
+  <div class="corpo">
+    <form method="post" action="<%= cliente.id ? '/clientes/' + cliente.id : '/clientes' %>">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="campos">
+        <div class="campo largo">
+          <label for="nome">Nome ou razão social</label>
+          <input type="text" id="nome" name="nome" value="<%= cliente.nome || '' %>" required minlength="3" maxlength="140" autofocus placeholder="Como o cliente é chamado nas notas">
+        </div>
+        <div class="campo">
+          <label for="telefone">Telefone <span class="ajuda">com DDD, para ligar e enviar WhatsApp</span></label>
+          <input type="tel" id="telefone" name="telefone" value="<%= cliente.telefone || '' %>" required maxlength="20" placeholder="63988110022">
+        </div>
+        <div class="campo">
+          <label for="cidade">Cidade</label>
+          <input type="text" id="cidade" name="cidade" value="<%= cliente.cidade || '' %>" maxlength="90" placeholder="Palmas">
+        </div>
+        <div class="campo largo">
+          <label for="endereco">Endereço de entrega</label>
+          <input type="text" id="endereco" name="endereco" value="<%= cliente.endereco || '' %>" required minlength="5" maxlength="255" placeholder="Rua, número, bairro e ponto de referência">
+          <span class="ajuda">Este endereço é sugerido automaticamente ao criar uma entrega.</span>
+        </div>
+        <% if (cliente.id) { %>
+        <div class="campo marcador largo">
+          <input type="checkbox" id="ativo" name="ativo" <%= cliente.ativo === false ? '' : 'checked' %>>
+          <label for="ativo">Cliente ativo — aparece na lista ao criar pedidos</label>
+        </div>
+        <% } %>
+      </div>
+      <div class="acoes-form">
+        <button type="submit" class="btn btn-primario" data-carregando="Salvando cliente...">Salvar cliente</button>
+        <a class="btn" href="<%= cliente.id ? '/clientes/' + cliente.id : '/clientes' %>">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('../partials/rodape') %>

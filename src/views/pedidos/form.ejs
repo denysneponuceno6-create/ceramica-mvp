@@ -1,0 +1,78 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Comercial</p>
+    <h1>Novo pedido</h1>
+    <p class="subtitulo">O pedido entra como "Novo" e segue o fluxo até a entrega.</p>
+  </div>
+  <div class="acoes"><a class="btn" href="/pedidos">Voltar para pedidos</a></div>
+</div>
+
+<% if (!clientes.length || !produtos.length) { %>
+  <div class="aviso aviso-atencao">
+    <svg class="i"><use href="#ic-atencao"/></svg>
+    <span class="texto-aviso">
+      Para criar pedidos é preciso ter pelo menos um cliente e um produto ativo.
+      <% if (!clientes.length) { %><a href="/clientes/novo">Cadastrar cliente</a><% } %>
+      <% if (!produtos.length) { %><a href="/produtos/novo">Cadastrar produto</a><% } %>
+    </span>
+  </div>
+<% } %>
+
+<section class="cartao">
+  <div class="corpo">
+    <form method="post" action="/pedidos" id="form-pedido">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="campos">
+        <div class="campo">
+          <label for="cliente_id">Cliente</label>
+          <select id="cliente_id" name="cliente_id" required>
+            <option value="">Selecione o cliente</option>
+            <% clientes.forEach(function (c) { %>
+              <option value="<%= c.id %>" <%= String(pedido.cliente_id) === String(c.id) ? 'selected' : '' %>><%= c.nome %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="data_entrega">Data de entrega</label>
+          <input type="date" id="data_entrega" name="data_entrega" value="<%= f.dataInput(pedido.data_entrega) || f.hoje() %>" required>
+        </div>
+        <div class="campo largo">
+          <label for="observacao">Observação <span class="ajuda">opcional</span></label>
+          <textarea id="observacao" name="observacao" maxlength="1000" placeholder="Ponto de referência, horário preferido, condições de acesso"><%= pedido.observacao || '' %></textarea>
+        </div>
+      </div>
+
+      <h3 class="titulo-itens">Itens do pedido</h3>
+      <div id="itens">
+        <div class="campos linha-item">
+          <div class="campo">
+            <label>Produto</label>
+            <select name="produto_id" required>
+              <option value="">Selecione o produto</option>
+              <% produtos.forEach(function (p) { %>
+                <option value="<%= p.id %>"><%= p.nome %> — saldo de <%= f.numero(p.saldo) %> <%= p.unidade %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Quantidade</label>
+            <input type="number" name="quantidade" min="1" step="1" value="1" required>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-pequeno" id="add-item">
+        <svg class="i i-p"><use href="#ic-mais"/></svg>Adicionar outro produto
+      </button>
+
+      <div class="acoes-form">
+        <button type="submit" class="btn btn-primario" data-carregando="Criando pedido...">Criar pedido</button>
+        <a class="btn" href="/pedidos">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('../partials/rodape') %>

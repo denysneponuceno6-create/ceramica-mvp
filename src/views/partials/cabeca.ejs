@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#100E0D">
+<title><%= titulo %> &middot; Cerâmica Betim</title>
+<link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/app.css?v=<%= v %>">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/img/favicon.svg">
+</head>
+<body>
+
+<a class="pular" href="#conteudo-principal">Ir direto para o conteúdo</a>
+
+<!-- ---------------------------------------------------------------------
+     Biblioteca de ícones. Um único estilo em todo o sistema: contorno de
+     1,75 px, cantos arredondados, grade de 24 px. Usada com <use href="#...">.
+     --------------------------------------------------------------------- -->
+<svg xmlns="http://www.w3.org/2000/svg" class="oculto" aria-hidden="true">
+  <symbol id="ic-painel" viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
+  <symbol id="ic-pedidos" viewBox="0 0 24 24"><path d="M3 8h18v12H3z"/><path d="M3 12h18M9 8v12M15 8v12"/><path d="M5 8V5h14v3"/></symbol>
+  <symbol id="ic-clientes" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 5.5a3 3 0 010 5.6M17.5 20a6 6 0 00-2-4.5"/></symbol>
+  <symbol id="ic-producao" viewBox="0 0 24 24"><path d="M3 20V9l5 3.5V9l5 3.5V9l5 3.5V20z"/><path d="M18 12.5V4h3v8.5"/><path d="M3 16h18"/></symbol>
+  <symbol id="ic-estoque" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 12l9 4 9-4M3 17l9 4 9-4"/></symbol>
+  <symbol id="ic-produtos" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/><path d="M12 4v6M8 14v6M16 14v6"/></symbol>
+  <symbol id="ic-entregas" viewBox="0 0 24 24"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3.5V16h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></symbol>
+  <symbol id="ic-frota" viewBox="0 0 24 24"><path d="M3 17V7h10v10"/><path d="M13 10h4.5L21 14v3h-8"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></symbol>
+  <symbol id="ic-relatorios" viewBox="0 0 24 24"><path d="M4 20V4h11l5 5v11z"/><path d="M15 4v5h5"/><path d="M8 17v-4M12 17v-6M16 17v-2"/></symbol>
+  <symbol id="ic-usuarios" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0114 0"/></symbol>
+  <symbol id="ic-auditoria" viewBox="0 0 24 24"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/><path d="M8 13h8M8 16.5h5"/></symbol>
+  <symbol id="ic-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="ic-sair" viewBox="0 0 24 24"><path d="M14 4h4a1 1 0 011 1v14a1 1 0 01-1 1h-4"/><path d="M10 8l-4 4 4 4M6 12h9"/></symbol>
+  <symbol id="ic-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.2 12.3l2.6 2.6 5-5.2"/></symbol>
+  <symbol id="ic-atencao" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.1"/></symbol>
+  <symbol id="ic-erro" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2M12 16.4v.1"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.7v.1"/></symbol>
+  <symbol id="ic-fechar" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="ic-relogio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.4l3.4 2"/></symbol>
+  <symbol id="ic-local" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></symbol>
+  <symbol id="ic-telefone" viewBox="0 0 24 24"><path d="M6.5 3.5h3l1.5 4-2 1.4a12 12 0 006.1 6.1l1.4-2 4 1.5v3a2 2 0 01-2.2 2A16.5 16.5 0 014.5 5.7a2 2 0 012-2.2z"/></symbol>
+  <symbol id="ic-whatsapp" viewBox="0 0 24 24"><path d="M20 11.6a8 8 0 01-11.9 7L4 20l1.5-4a8 8 0 1114.5-4.4z"/><path d="M9.2 9.1c.3-.7.6-.7.9-.7h.6l.9 2-.8.8a6 6 0 002.9 2.9l.9-.8 2 .9v.7c0 .3-.1.6-.8.8-1.6.5-4.1-.8-5.6-2.4-1.5-1.5-2.5-3.7-1-4.2z"/></symbol>
+  <symbol id="ic-dinheiro" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 10v4M18 10v4"/></symbol>
+  <symbol id="ic-caixa-vazia" viewBox="0 0 24 24"><path d="M3 8l3-4h12l3 4v12H3z"/><path d="M3 8h18M9 12h6"/></symbol>
+  <symbol id="ic-mais" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="ic-forno" viewBox="0 0 24 24"><path d="M4 20V9a8 8 0 0116 0v11z"/><path d="M9 20v-6a3 3 0 016 0v6"/><path d="M4 16h16"/></symbol>
+  <symbol id="ic-grafico" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M8 16v-5M12 16V8M16 16v-3M20 16V6"/></symbol>
+</svg>
+
+<!-- ------------------------------ menu lateral --------------------------- -->
+<aside class="lateral" id="lateral">
+  <a class="marca" href="/">
+    <img src="/assets/img/marca.svg" alt="" aria-hidden="true">
+    <span class="texto"><b>Cerâmica</b><i>Betim</i></span>
+  </a>
+
+  <nav class="menu" aria-label="Menu principal">
+    <p class="secao">Operação</p>
+    <ul>
+      <li><a href="/" class="<%= caminho === '/' ? 'ativo' : '' %>"><svg class="i"><use href="#ic-painel"/></svg>Painel</a></li>
+      <% if (pode('pedidos:ver')) { %>
+      <li><a href="/pedidos" class="<%= caminho.startsWith('/pedidos') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-pedidos"/></svg>Pedidos</a></li>
+      <% } %>
+      <% if (pode('entregas:ver')) { %>
+      <li><a href="/entregas" class="<%= caminho.startsWith('/entregas') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-entregas"/></svg>Entregas</a></li>
+      <% } %>
+      <% if (pode('frota:ver')) { %>
+      <li><a href="/frota" class="<%= caminho.startsWith('/frota') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-frota"/></svg>Caminhões</a></li>
+      <% } %>
+      <% if (pode('clientes:ver')) { %>
+      <li><a href="/clientes" class="<%= caminho.startsWith('/clientes') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-clientes"/></svg>Clientes</a></li>
+      <% } %>
+    </ul>
+
+    <p class="secao">Fábrica</p>
+    <ul>
+      <% if (pode('producao:ver')) { %>
+      <li><a href="/producao" class="<%= caminho.startsWith('/producao') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-producao"/></svg>Produção</a></li>
+      <% } %>
+      <% if (pode('estoque:ver')) { %>
+      <li><a href="/estoque" class="<%= caminho.startsWith('/estoque') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-estoque"/></svg>Estoque</a></li>
+      <% } %>
+      <% if (pode('produtos:ver')) { %>
+      <li><a href="/produtos" class="<%= caminho.startsWith('/produtos') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-produtos"/></svg>Produtos</a></li>
+      <% } %>
+    </ul>
+
+    <% if (usuario.perfil === 'admin') { %>
+    <p class="secao">Administração</p>
+    <ul>
+      <li><a href="/usuarios" class="<%= caminho.startsWith('/usuarios') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-usuarios"/></svg>Usuários</a></li>
+      <li><a href="/auditoria" class="<%= caminho.startsWith('/auditoria') ? 'ativo' : '' %>"><svg class="i"><use href="#ic-auditoria"/></svg>Auditoria</a></li>
+    </ul>
+    <% } %>
+  </nav>
+
+  <p class="rodape-lateral"><b>Produzimos.</b> Organizamos. Entregamos.</p>
+</aside>
+
+<button class="veu" id="veu" type="button" aria-label="Fechar menu"></button>
+
+<!-- -------------------------------- conteúdo ----------------------------- -->
+<div class="conteudo">
+  <header class="topo">
+    <div class="topo-linha">
+      <button class="abrir-menu" id="abrir-menu" type="button" aria-label="Abrir menu" aria-controls="lateral" aria-expanded="false">
+        <svg class="i"><use href="#ic-menu"/></svg>
+      </button>
+
+      <a class="marca-mobile" href="/">
+        <img src="/assets/img/marca.svg" alt="" aria-hidden="true">
+        <span class="texto"><b>Cerâmica</b><i>Betim</i></span>
+      </a>
+
+      <div class="saudacao">
+        <b>Olá, <%= (usuario.nome || '').split(' ')[0] %></b>
+        <span><%= d.ROTULO_PERFIL[usuario.perfil] || usuario.perfil %> &middot; <%= f.data(f.hoje()) %></span>
+      </div>
+
+      <div class="topo-dir">
+        <div class="quem">
+          <span class="avatar" aria-hidden="true"><%= (usuario.nome || '?').trim().charAt(0).toUpperCase() %></span>
+          <span class="id">
+            <b><%= usuario.nome %></b>
+            <span><%= d.ROTULO_PERFIL[usuario.perfil] || usuario.perfil %></span>
+          </span>
+        </div>
+        <form method="post" action="/logout">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <button type="submit" class="btn btn-pequeno" data-carregando="Saindo...">
+            <svg class="i i-p"><use href="#ic-sair"/></svg>Sair
+          </button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <main class="pagina" id="conteudo-principal">
+<%- include('alertas') %>

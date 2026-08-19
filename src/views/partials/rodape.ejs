@@ -1,0 +1,26 @@
+  </main>
+
+  <!-- Navegação inferior: aparece apenas no celular, ao alcance do polegar. -->
+  <nav class="barra-inferior" aria-label="Navegação rápida">
+    <a href="/" class="<%= caminho === '/' ? 'ativo' : '' %>">
+      <svg class="i"><use href="#ic-painel"/></svg>Painel
+    </a>
+    <% if (pode('entregas:ver')) { %>
+    <a href="/entregas" class="<%= caminho.startsWith('/entregas') ? 'ativo' : '' %>">
+      <svg class="i"><use href="#ic-entregas"/></svg>Entregas
+    </a>
+    <% } %>
+    <% if (pode('pedidos:ver')) { %>
+    <a href="/pedidos" class="<%= caminho.startsWith('/pedidos') ? 'ativo' : '' %>">
+      <svg class="i"><use href="#ic-pedidos"/></svg>Pedidos
+    </a>
+    <% } %>
+    <button type="button" data-abre-menu aria-label="Abrir menu completo">
+      <svg class="i"><use href="#ic-menu"/></svg>Menu
+    </button>
+  </nav>
+</div>
+
+<script src="/assets/js/app.js?v=<%= v %>" defer></script>
+</body>
+</html>

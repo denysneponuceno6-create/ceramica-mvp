@@ -1,0 +1,16 @@
+<% if (nav.total > 0) { %>
+<nav class="paginacao" aria-label="Paginação">
+  <span>
+    <%= f.numero(nav.total) %> <%= nav.total === 1 ? 'registro' : 'registros' %>
+    &middot; página <%= nav.pagina %> de <%= nav.totalPaginas %>
+  </span>
+  <span class="nav">
+    <% if (nav.temAnterior) { %>
+      <a class="btn btn-pequeno" href="<%= nav.urlAnterior %>">Página anterior</a>
+    <% } %>
+    <% if (nav.temProxima) { %>
+      <a class="btn btn-pequeno" href="<%= nav.urlProxima %>">Próxima página</a>
+    <% } %>
+  </span>
+</nav>
+<% } %>

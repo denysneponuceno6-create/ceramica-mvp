@@ -1,0 +1,71 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Comercial</p>
+    <h1>Pedidos</h1>
+  </div>
+  <div class="acoes">
+    <% if (pode('pedidos:editar')) { %><a class="btn btn-primario" href="/pedidos/novo"><svg class="i i-p"><use href="#ic-mais"/></svg>Novo pedido</a><% } %>
+  </div>
+</div>
+
+<section class="cartao">
+  <header>
+    <form method="get" action="/pedidos" class="barra-filtro largura-total">
+      <input type="search" name="busca" value="<%= busca %>" placeholder="Buscar pelo nome do cliente" maxlength="80" aria-label="Buscar pelo nome do cliente">
+      <select name="status" aria-label="Filtrar por status">
+        <option value="">Todos os status</option>
+        <% d.STATUS_PEDIDO.forEach(function (s) { %>
+          <option value="<%= s %>" <%= status === s ? 'selected' : '' %>><%= d.ROTULO_STATUS_PEDIDO[s] %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="btn">Filtrar</button>
+      <% if (status || busca) { %><a class="btn" href="/pedidos">Limpar filtros</a><% } %>
+    </form>
+  </header>
+
+  <% if (!pedidos.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-pedidos"/></svg>
+      <b><%= (status || busca) ? 'Nenhum pedido encontrado' : 'Nenhum pedido cadastrado' %></b>
+      <p><%= (status || busca) ? 'Troque os filtros para ver os outros pedidos.' : 'Registre o primeiro pedido para começar o fluxo.' %></p>
+      <% if (pode('pedidos:editar') && !(status || busca)) { %><a class="btn btn-primario" href="/pedidos/novo">Criar pedido</a><% } %>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Pedido</th>
+          <th>Entrega prevista</th>
+          <th class="num">Itens</th>
+          <th class="num">Valor</th>
+          <th>Status</th>
+          <th>Etapa do fluxo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% pedidos.forEach(function (p) { %>
+        <tr class="<%= p.atrasado ? 'linha-atrasada' : '' %>">
+          <td class="destaque"><a href="/pedidos/<%= p.id %>"><%= p.cliente %></a></td>
+          <td data-rotulo="Pedido" class="compacto"><a href="/pedidos/<%= p.id %>">#<%= p.id %></a></td>
+          <td data-rotulo="Entrega prevista" class="compacto">
+            <%= f.data(p.data_entrega) %>
+            <% if (p.atrasado) { %><span class="tag tag-atraso">Atrasado</span><% } %>
+          </td>
+          <td data-rotulo="Itens" class="num"><%= p.total_itens %></td>
+          <td data-rotulo="Valor" class="num"><%= f.dinheiro(p.valor_total) %></td>
+          <td data-rotulo="Status"><span class="tag tag-<%= p.status %>"><%= d.ROTULO_STATUS_PEDIDO[p.status] %></span></td>
+          <td data-rotulo="Etapa" class="col-fluxo"><%- include('../partials/trilha', { status: p.status }) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/paginacao') %>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

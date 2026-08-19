@@ -1,0 +1,334 @@
+<%- include('partials/cabeca') %>
+
+<%#
+  Hero institucional: a fotografia da fábrica conta o fluxo real da empresa —
+  forno, produção, estoque, caminhão, entrega. Fica atrás de um véu escuro em
+  degradê para não disputar atenção com os números, e é o único lugar do
+  sistema com imagem: nas telas de trabalho, só dado.
+%>
+<section class="hero">
+  <img src="/assets/img/forno.jpg"
+       srcset="/assets/img/forno-640.jpg 640w, /assets/img/forno.jpg 1066w"
+       sizes="(max-width: 680px) 100vw, 1140px"
+       alt="" aria-hidden="true" width="1066" height="840" fetchpriority="high">
+  <div class="dentro">
+    <p class="eyebrow">Painel operacional &middot; <%= f.data(f.hoje()) %></p>
+    <h1>Visão do dia</h1>
+    <p class="subtitulo">
+      Olá, <%= (usuario.nome || '').split(' ')[0] %>. Veja abaixo o que precisa da sua atenção agora.
+    </p>
+    <ul class="lema">
+      <li><svg class="i"><use href="#ic-forno"/></svg>Produzimos</li>
+      <li><svg class="i"><use href="#ic-estoque"/></svg>Organizamos</li>
+      <li><svg class="i"><use href="#ic-frota"/></svg>Entregamos</li>
+    </ul>
+  </div>
+</section>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Resumo operacional</p>
+    <h2>O que está acontecendo agora</h2>
+  </div>
+  <div class="acoes">
+    <% if (pode('pedidos:editar')) { %><a class="btn btn-primario" href="/pedidos/novo"><svg class="i i-p"><use href="#ic-mais"/></svg>Novo pedido</a><% } %>
+    <% if (pode('producao:editar')) { %><a class="btn" href="/producao">Registrar produção</a><% } %>
+  </div>
+</div>
+
+<%#
+  Avisos que exigem ação vêm antes dos números: quem abre o painel de manhã
+  precisa saber primeiro o que está atrasado, e só depois como está o volume.
+%>
+<%
+  var alertas = [];
+  if (resumo.entregas_atrasadas > 0) alertas.push({
+    tipo: 'erro', icone: 'ic-erro',
+    texto: resumo.entregas_atrasadas + (resumo.entregas_atrasadas === 1 ? ' entrega está com a data prevista vencida.' : ' entregas estão com a data prevista vencida.'),
+    link: '/entregas?status=pendente', rotulo: 'Ver entregas',
+  });
+  if (resumo.pedidos_prontos > 0) alertas.push({
+    tipo: 'atencao', icone: 'ic-atencao',
+    texto: resumo.pedidos_prontos + (resumo.pedidos_prontos === 1 ? ' pedido está pronto e aguarda expedição.' : ' pedidos estão prontos e aguardam expedição.'),
+    link: '/pedidos?status=pronto', rotulo: 'Ver pedidos',
+  });
+  if (resumo.estoque_alerta > 0) alertas.push({
+    tipo: 'atencao', icone: 'ic-atencao',
+    texto: resumo.estoque_alerta + (resumo.estoque_alerta === 1 ? ' produto está no estoque mínimo ou abaixo.' : ' produtos estão no estoque mínimo ou abaixo.'),
+    link: '/estoque', rotulo: 'Ver estoque',
+  });
+%>
+<% alertas.forEach(function (a) { %>
+  <div class="aviso aviso-<%= a.tipo %>">
+    <svg class="i"><use href="#<%= a.icone %>"/></svg>
+    <span class="texto-aviso"><%= a.texto %> <a href="<%= a.link %>"><%= a.rotulo %></a></span>
+  </div>
+<% }) %>
+
+<div class="indicadores">
+  <a class="kpi <%= resumo.entregas_atrasadas > 0 ? 'perigo' : 'marca' %>" href="/entregas">
+    <div class="rotulo"><svg class="i"><use href="#ic-entregas"/></svg>Entregas em aberto</div>
+    <div class="valor"><%= f.numero(resumo.entregas_abertas) %></div>
+    <div class="nota">
+      <% if (resumo.entregas_atrasadas > 0) { %>
+        <%= f.numero(resumo.entregas_atrasadas) %> <%= resumo.entregas_atrasadas === 1 ? 'atrasada' : 'atrasadas' %>
+      <% } else { %>
+        Nenhuma atrasada
+      <% } %>
+    </div>
+  </a>
+  <a class="kpi bom" href="/entregas?status=entregue">
+    <div class="rotulo"><svg class="i"><use href="#ic-ok"/></svg>Entregues hoje</div>
+    <div class="valor"><%= f.numero(resumo.entregas_hoje) %></div>
+    <div class="nota">Confirmadas nas últimas 24 horas</div>
+  </a>
+  <a class="kpi" href="/pedidos">
+    <div class="rotulo"><svg class="i"><use href="#ic-pedidos"/></svg>Pedidos de hoje</div>
+    <div class="valor"><%= f.numero(resumo.pedidos_hoje) %></div>
+    <div class="nota"><%= f.numero(resumo.pedidos_pendentes) %> em aberto no total</div>
+  </a>
+  <a class="kpi" href="/producao">
+    <div class="rotulo"><svg class="i"><use href="#ic-producao"/></svg>Produção de hoje</div>
+    <div class="valor"><%= f.numero(resumo.producao_hoje) %></div>
+    <div class="nota"><%= f.numero(resumo.producao_semana) %> nos últimos 7 dias</div>
+  </a>
+  <a class="kpi <%= resumo.estoque_alerta > 0 ? 'atencao' : 'bom' %>" href="/estoque">
+    <div class="rotulo"><svg class="i"><use href="#ic-estoque"/></svg>Estoque total</div>
+    <div class="valor"><%= f.numero(resumo.estoque_total) %></div>
+    <div class="nota">
+      <% if (resumo.estoque_alerta > 0) { %>
+        <%= f.numero(resumo.estoque_alerta) %> <%= resumo.estoque_alerta === 1 ? 'produto para repor' : 'produtos para repor' %>
+      <% } else { %>
+        Todos os produtos acima do mínimo
+      <% } %>
+    </div>
+  </a>
+  <a class="kpi" href="/frota">
+    <div class="rotulo"><svg class="i"><use href="#ic-frota"/></svg>Veículos disponíveis</div>
+    <div class="valor"><%= f.numero(resumo.veiculos_disponiveis) %></div>
+    <div class="nota">de <%= f.numero(resumo.veiculos_ativos) %> <%= resumo.veiculos_ativos === 1 ? 'veículo ativo' : 'veículos ativos' %></div>
+  </a>
+</div>
+
+<%#
+  Gráfico de produção: SVG desenhado aqui no servidor, a partir da série que a
+  rota já consultou. Sem biblioteca e sem requisição extra — o gráfico chega
+  junto com a página, o que importa em conexão móvel lenta.
+%>
+<%
+  var serie = (typeof producaoSerie !== 'undefined' && producaoSerie) ? producaoSerie : [];
+  var pico = Math.max(1, ...serie.map(function (x) { return Number(x.quantidade) + Number(x.perdas); }));
+  var larg = 720, alt = 224, base = alt - 28, topo = 14;
+  var passo = serie.length ? larg / serie.length : larg;
+  var colLarg = Math.min(56, passo * 0.56);
+  var DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+  var totalSemana = serie.reduce(function (s, x) { return s + Number(x.quantidade); }, 0);
+  var totalPerdas = serie.reduce(function (s, x) { return s + Number(x.perdas); }, 0);
+%>
+<% if (serie.length) { %>
+<section class="cartao">
+  <header>
+    <div>
+      <h2>Produção dos últimos 7 dias</h2>
+      <p class="subtitulo">Quantidade queimada por dia, com as perdas destacadas.</p>
+    </div>
+    <div class="acoes">
+      <div class="resumo-topo">
+        <div class="rotulo">Total no período</div>
+        <div class="cifra"><%= f.numero(totalSemana) %></div>
+      </div>
+    </div>
+  </header>
+  <div class="corpo">
+    <svg class="grafico" viewBox="0 0 <%= larg %> <%= alt %>" role="img"
+         aria-label="Produção diária dos últimos 7 dias: <%= serie.map(function(x){ return f.data(x.data) + ' com ' + f.numero(x.quantidade); }).join('; ') %>.">
+      <defs>
+        <linearGradient id="gradBarra" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F0793A"/>
+          <stop offset="1" stop-color="#A8390F"/>
+        </linearGradient>
+        <linearGradient id="gradBarraHoje" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFB06A"/>
+          <stop offset="1" stop-color="#D4551D"/>
+        </linearGradient>
+      </defs>
+
+      <%# Linhas-guia em 50% e 100% do pico, para dar escala à leitura. %>
+      <line class="linha-guia" x1="0" y1="<%= topo %>" x2="<%= larg %>" y2="<%= topo %>"/>
+      <line class="linha-guia" x1="0" y1="<%= topo + (base - topo) / 2 %>" x2="<%= larg %>" y2="<%= topo + (base - topo) / 2 %>"/>
+      <line class="eixo" x1="0" y1="<%= base %>" x2="<%= larg %>" y2="<%= base %>"/>
+
+      <% serie.forEach(function (ponto, i) {
+           var qtd = Number(ponto.quantidade), perda = Number(ponto.perdas);
+           var altura = Math.round(((qtd + perda) / pico) * (base - topo));
+           var altPerda = (qtd + perda) > 0 ? Math.round((perda / (qtd + perda)) * altura) : 0;
+           var x = Math.round(i * passo + (passo - colLarg) / 2);
+           var y = base - altura;
+           var iso = String(ponto.data).slice(0, 10);
+           var diaSemana = DIAS[new Date(iso + 'T12:00:00Z').getUTCDay()];
+           var ehHoje = iso === f.hoje();
+      %>
+        <% if (altura > 0) { %>
+          <rect class="barra-col <%= ehHoje ? 'hoje' : '' %>" x="<%= x %>" y="<%= y %>"
+                width="<%= colLarg %>" height="<%= altura %>" rx="3"/>
+          <% if (altPerda > 0) { %>
+            <rect class="barra-perda" x="<%= x %>" y="<%= y %>" width="<%= colLarg %>" height="<%= altPerda %>" rx="3"/>
+          <% } %>
+          <text class="valor-barra" x="<%= x + colLarg / 2 %>" y="<%= y - 6 %>" text-anchor="middle"><%= f.numero(qtd) %></text>
+        <% } else { %>
+          <rect x="<%= x %>" y="<%= base - 2 %>" width="<%= colLarg %>" height="2" rx="1" fill="rgba(255,255,255,.12)"/>
+        <% } %>
+        <text class="rotulo-eixo" x="<%= x + colLarg / 2 %>" y="<%= base + 16 %>" text-anchor="middle">
+          <%= diaSemana %> <%= iso.slice(8, 10) %>
+        </text>
+      <% }) %>
+    </svg>
+
+    <div class="legenda">
+      <span><i class="produzido"></i>Produzido no período: <%= f.numero(totalSemana) %></span>
+      <span><i class="perdido"></i>Perdas na queima: <%= f.numero(totalPerdas) %></span>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<%# Elemento-assinatura: a fiada. Cada etapa do fluxo é um tijolo. %>
+<section class="cartao">
+  <header>
+    <div>
+      <h2>Fluxo dos pedidos</h2>
+      <p class="subtitulo">Do pedido novo até a entrega concluída</p>
+    </div>
+    <div class="acoes">
+      <div class="resumo-topo">
+        <div class="rotulo">Faturamento do mês</div>
+        <div class="cifra"><%= f.dinheiro(resumo.faturamento_mes) %></div>
+      </div>
+    </div>
+  </header>
+  <div class="corpo">
+    <div class="fiada">
+      <% d.ESTEIRA.forEach(function (etapa) { var qtd = mapaStatus[etapa] || 0; %>
+        <a class="etapa <%= qtd > 0 ? 'queimado' : 'cru' %>" href="/pedidos?status=<%= etapa %>">
+          <div class="nome"><%= d.ROTULO_STATUS_PEDIDO[etapa] %></div>
+          <div class="qtd"><%= f.numero(qtd) %></div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="cartao">
+  <header>
+    <h2>Próximas entregas</h2>
+    <div class="acoes"><a class="btn btn-pequeno" href="/entregas">Ver todas as entregas</a></div>
+  </header>
+  <% if (!proximasEntregas.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-entregas"/></svg>
+      <b>Nenhuma entrega em aberto</b>
+      <p>Assim que um pedido for marcado como Pronto, a entrega aparece aqui.</p>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr><th>Cliente</th><th>Entrega</th><th>Data prevista</th><th>Motorista</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <% proximasEntregas.forEach(function (e) { %>
+        <tr class="<%= e.atrasada ? 'linha-atrasada' : '' %>">
+          <td class="destaque"><a href="/entregas/<%= e.id %>"><%= e.cliente %></a></td>
+          <td data-rotulo="Entrega" class="compacto">
+            <span class="celula">
+              <a href="/entregas/<%= e.id %>">Entrega #<%= e.id %></a>
+              <small>Pedido #<%= e.pedido_id %></small>
+            </span>
+          </td>
+          <td data-rotulo="Data prevista" class="compacto">
+            <%= f.data(e.data_prevista) %>
+            <% if (e.atrasada) { %><span class="tag tag-atraso">Atrasada</span><% } %>
+          </td>
+          <td data-rotulo="Motorista"><%= e.motorista || 'A definir' %></td>
+          <td data-rotulo="Status"><span class="tag tag-<%= e.status %>"><%= d.ROTULO_STATUS_ENTREGA[e.status] %></span></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<div class="duas-colunas">
+  <section class="cartao">
+    <header>
+      <h2>Pedidos recentes</h2>
+      <div class="acoes"><a class="btn btn-pequeno" href="/pedidos">Ver todos</a></div>
+    </header>
+    <% if (!pedidosRecentes.length) { %>
+      <div class="vazio">
+        <svg class="i"><use href="#ic-pedidos"/></svg>
+        <b>Nenhum pedido cadastrado</b>
+        <p>Comece registrando o primeiro pedido do cliente.</p>
+        <% if (pode('pedidos:editar')) { %><a class="btn btn-primario" href="/pedidos/novo">Criar o primeiro pedido</a><% } %>
+      </div>
+    <% } else { %>
+    <div class="tabela-rolagem">
+      <table class="responsiva">
+        <thead>
+          <tr><th>Cliente</th><th>Pedido</th><th>Entrega</th><th>Status</th><th class="num">Valor</th></tr>
+        </thead>
+        <tbody>
+          <% pedidosRecentes.forEach(function (p) { %>
+          <tr class="<%= p.atrasado ? 'linha-atrasada' : '' %>">
+            <td class="destaque"><a href="/pedidos/<%= p.id %>"><%= p.cliente %></a></td>
+            <td data-rotulo="Pedido" class="compacto"><a href="/pedidos/<%= p.id %>">#<%= p.id %></a></td>
+            <td data-rotulo="Entrega" class="compacto">
+              <%= f.data(p.data_entrega) %>
+              <% if (p.atrasado) { %><span class="tag tag-atraso">Atrasado</span><% } %>
+            </td>
+            <td data-rotulo="Status"><span class="tag tag-<%= p.status %>"><%= d.ROTULO_STATUS_PEDIDO[p.status] %></span></td>
+            <td data-rotulo="Valor" class="num"><%= f.dinheiro(p.valor_total) %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </section>
+
+  <section class="cartao">
+    <header>
+      <h2>Estoque em atenção</h2>
+      <div class="acoes"><a class="btn btn-pequeno" href="/estoque">Ver estoque</a></div>
+    </header>
+    <% if (!estoque.length) { %>
+      <div class="vazio">
+        <svg class="i"><use href="#ic-caixa-vazia"/></svg>
+        <b>Nenhum produto cadastrado</b>
+        <p>Cadastre os produtos para acompanhar o saldo.</p>
+      </div>
+    <% } else { %>
+    <ul class="lista-simples">
+      <% estoque.forEach(function (e) {
+           var alvo = Math.max(e.estoque_minimo * 2, e.quantidade, 1);
+           var pct = Math.min(100, Math.round((e.quantidade / alvo) * 100));
+           // A CSP bloqueia style inline: a largura vira classe, em passos de 5%.
+           var faixa = 'p' + (Math.round(pct / 5) * 5);
+           var classe = e.quantidade <= e.estoque_minimo ? 'critico' : (e.quantidade <= e.estoque_minimo * 1.5 ? 'baixo' : '');
+      %>
+      <li>
+        <div class="principal">
+          <b><%= e.nome %></b>
+          <small><%= f.numero(e.quantidade) %> <%= e.unidade %> em estoque &middot; mínimo <%= f.numero(e.estoque_minimo) %></small>
+          <div class="barra"><i class="<%= classe %> <%= faixa %>"></i></div>
+        </div>
+        <% if (e.quantidade <= e.estoque_minimo) { %><span class="tag tag-atraso">Repor</span><% } %>
+      </li>
+      <% }) %>
+    </ul>
+    <% } %>
+  </section>
+</div>
+
+<%- include('partials/rodape') %>

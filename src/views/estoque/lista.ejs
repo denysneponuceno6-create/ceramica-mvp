@@ -1,0 +1,173 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Almoxarifado</p>
+    <h1>Estoque</h1>
+    <p class="subtitulo">A produção soma no saldo. Pedidos marcados como Pronto dão baixa.</p>
+  </div>
+  <div class="acoes">
+    <a class="btn" href="/estoque/movimentos">Ver movimentações</a>
+  </div>
+</div>
+
+<section class="cartao">
+  <header><h2>Posição atual</h2></header>
+  <% if (!itens.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-caixa-vazia"/></svg>
+      <b>Nenhum produto cadastrado</b>
+      <p>Cadastre os produtos da cerâmica para acompanhar o saldo.</p>
+      <% if (pode('produtos:editar')) { %><a class="btn btn-primario" href="/produtos/novo">Cadastrar produto</a><% } %>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th class="num">Saldo</th>
+          <th class="num">Estoque mínimo</th>
+          <th>Situação</th>
+          <th>Atualizado em</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% itens.forEach(function (i) { %>
+        <tr class="<%= i.alerta ? 'linha-atrasada' : '' %>">
+          <td class="destaque">
+            <span class="celula">
+              <span><%= i.nome %><% if (!i.ativo) { %> <span class="tag tag-inativo">Inativo</span><% } %></span>
+              <small>Unidade: <%= i.unidade %></small>
+            </span>
+          </td>
+          <td data-rotulo="Saldo" class="num"><b><%= f.numero(i.quantidade) %></b></td>
+          <td data-rotulo="Estoque mínimo" class="num"><%= f.numero(i.estoque_minimo) %></td>
+          <td data-rotulo="Situação">
+            <% if (i.alerta) { %>
+              <span class="tag tag-atraso">Repor</span>
+            <% } else { %>
+              <span class="tag tag-disponivel">Normal</span>
+            <% } %>
+          </td>
+          <td data-rotulo="Atualizado em" class="compacto"><%= f.dataHora(i.atualizado_em) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<% if (pode('estoque:editar') && itens.length) { %>
+<div class="duas-colunas">
+  <section class="cartao">
+    <header><h2>Registrar movimentação</h2></header>
+    <div class="corpo">
+      <form method="post" action="/estoque/movimento">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="campos">
+          <div class="campo largo">
+            <label for="produto_id">Produto</label>
+            <select id="produto_id" name="produto_id" required>
+              <option value="">Selecione o produto</option>
+              <% itens.forEach(function (i) { %>
+                <option value="<%= i.id %>"><%= i.nome %> — saldo de <%= f.numero(i.quantidade) %> <%= i.unidade %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="tipo">Tipo de movimentação</label>
+            <select id="tipo" name="tipo" required>
+              <option value="entrada">Entrada — soma ao saldo</option>
+              <option value="saida">Saída — subtrai do saldo</option>
+              <option value="ajuste">Ajuste — define o saldo exato</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="quantidade">Quantidade</label>
+            <input type="number" id="quantidade" name="quantidade" min="1" step="1" required>
+          </div>
+          <div class="campo largo">
+            <label for="motivo">Motivo <span class="ajuda">opcional</span></label>
+            <input type="text" id="motivo" name="motivo" maxlength="160" placeholder="Compra, quebra na queima, inventário">
+          </div>
+        </div>
+        <div class="acoes-form">
+          <button type="submit" class="btn btn-primario" data-carregando="Registrando...">Registrar movimentação</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="cartao">
+    <header><h2>Definir estoque mínimo</h2></header>
+    <div class="corpo">
+      <form method="post" action="/estoque/minimo">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="campos">
+          <div class="campo largo">
+            <label for="produto_min">Produto</label>
+            <select id="produto_min" name="produto_id" required>
+              <option value="">Selecione o produto</option>
+              <% itens.forEach(function (i) { %>
+                <option value="<%= i.id %>"><%= i.nome %> — mínimo atual de <%= f.numero(i.estoque_minimo) %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="estoque_minimo">Novo mínimo</label>
+            <input type="number" id="estoque_minimo" name="estoque_minimo" min="0" step="1" required>
+          </div>
+        </div>
+        <div class="acoes-form">
+          <button type="submit" class="btn btn-primario" data-carregando="Salvando...">Salvar estoque mínimo</button>
+        </div>
+        <p class="subtitulo" class="margem-acima">
+          O painel avisa automaticamente quando o saldo fica igual ou abaixo do mínimo.
+        </p>
+      </form>
+    </div>
+  </section>
+</div>
+<% } %>
+
+<section class="cartao">
+  <header>
+    <h2>Últimas movimentações</h2>
+    <div class="acoes"><a class="btn btn-pequeno" href="/estoque/movimentos">Ver todas</a></div>
+  </header>
+  <% if (!movimentos.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-estoque"/></svg>
+      <b>Nenhuma movimentação registrada</b>
+      <p>Entradas, saídas e ajustes aparecem aqui em ordem de data.</p>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr><th>Produto</th><th>Data e hora</th><th>Tipo</th><th class="num">Quantidade</th><th>Motivo</th><th>Responsável</th></tr>
+      </thead>
+      <tbody>
+        <% movimentos.forEach(function (m) { %>
+        <tr>
+          <td class="destaque"><%= m.produto %></td>
+          <td data-rotulo="Data e hora" class="compacto"><%= f.dataHora(m.criado_em) %></td>
+          <td data-rotulo="Tipo"><span class="tag tag-<%= m.tipo %>"><%= d.ROTULO_MOVIMENTO[m.tipo] || m.tipo %></span></td>
+          <td data-rotulo="Quantidade" class="num"><%= f.numero(m.quantidade) %></td>
+          <td data-rotulo="Motivo">
+            <%= m.motivo || 'Não informado' %><% if (m.pedido_id) { %>
+              <a href="/pedidos/<%= m.pedido_id %>">Pedido #<%= m.pedido_id %></a>
+            <% } %>
+          </td>
+          <td data-rotulo="Responsável"><%= m.usuario || 'sistema' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

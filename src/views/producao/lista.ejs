@@ -1,0 +1,123 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Fábrica</p>
+    <h1>Produção</h1>
+    <p class="subtitulo">Cada registro entra automaticamente como entrada no estoque.</p>
+  </div>
+</div>
+
+<div class="indicadores">
+  <div class="kpi marca">
+    <div class="rotulo"><svg class="i"><use href="#ic-producao"/></svg>Produzido hoje</div>
+    <div class="valor"><%= f.numero(resumo.hoje) %></div>
+  </div>
+  <div class="kpi">
+    <div class="rotulo"><svg class="i"><use href="#ic-relogio"/></svg>Últimos 7 dias</div>
+    <div class="valor"><%= f.numero(resumo.semana) %></div>
+  </div>
+  <div class="kpi <%= resumo.perdas > 0 ? 'atencao' : 'bom' %>">
+    <div class="rotulo"><svg class="i"><use href="#ic-atencao"/></svg>Perdas na semana</div>
+    <div class="valor"><%= f.numero(resumo.perdas) %></div>
+    <div class="nota">Quebra na queima e no manuseio</div>
+  </div>
+</div>
+
+<% if (pode('producao:editar')) { %>
+<section class="cartao">
+  <header><h2>Registrar produção</h2></header>
+  <div class="corpo">
+    <% if (!produtos.length) { %>
+      <p class="subtitulo sem-margem">
+        Cadastre um produto ativo antes de registrar a produção.
+        <a href="/produtos/novo">Cadastrar produto</a>
+      </p>
+    <% } else { %>
+    <form method="post" action="/producao">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="campos">
+        <div class="campo largo">
+          <label for="produto_id">Produto</label>
+          <select id="produto_id" name="produto_id" required>
+            <option value="">Selecione o produto</option>
+            <% produtos.forEach(function (p) { %>
+              <option value="<%= p.id %>"><%= p.nome %> (<%= p.unidade %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="quantidade">Quantidade produzida</label>
+          <input type="number" id="quantidade" name="quantidade" min="1" step="1" required>
+        </div>
+        <div class="campo">
+          <label for="perdas">Perdas <span class="ajuda">quebra na queima</span></label>
+          <input type="number" id="perdas" name="perdas" min="0" step="1" value="0">
+        </div>
+        <div class="campo">
+          <label for="lote">Lote</label>
+          <input type="text" id="lote" name="lote" required maxlength="40" placeholder="L20260818-1">
+        </div>
+        <div class="campo">
+          <label for="data">Data da produção</label>
+          <input type="date" id="data" name="data" value="<%= hoje %>" required>
+        </div>
+        <div class="campo largo">
+          <label for="observacao">Observação <span class="ajuda">opcional</span></label>
+          <input type="text" id="observacao" name="observacao" maxlength="255" placeholder="Forno 2, queima noturna">
+        </div>
+      </div>
+      <div class="acoes-form">
+        <button type="submit" class="btn btn-primario" data-carregando="Registrando produção...">Registrar produção</button>
+      </div>
+    </form>
+    <% } %>
+  </div>
+</section>
+<% } %>
+
+<section class="cartao">
+  <header><h2>Registros de produção</h2></header>
+  <% if (!registros.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-producao"/></svg>
+      <b>Nenhuma produção registrada</b>
+      <p>Registre a produção do dia para alimentar o estoque.</p>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Data</th>
+          <th>Lote</th>
+          <th class="num">Produzido</th>
+          <th class="num">Perdas</th>
+          <th>Responsável</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% registros.forEach(function (r) { %>
+        <tr>
+          <td class="destaque">
+            <span class="celula">
+              <span><%= r.produto %></span>
+              <small>Unidade: <%= r.unidade %></small>
+            </span>
+          </td>
+          <td data-rotulo="Data" class="compacto"><%= f.data(r.data) %></td>
+          <td data-rotulo="Lote" class="mono"><%= r.lote %></td>
+          <td data-rotulo="Produzido" class="num"><b><%= f.numero(r.quantidade) %></b></td>
+          <td data-rotulo="Perdas" class="num"><%= f.numero(r.perdas) %></td>
+          <td data-rotulo="Responsável"><%= r.usuario || 'Não informado' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/paginacao') %>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

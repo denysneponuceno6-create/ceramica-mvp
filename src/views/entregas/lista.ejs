@@ -1,0 +1,95 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Logística</p>
+    <h1>Entregas</h1>
+    <p class="subtitulo">As entregas em aberto e as atrasadas aparecem primeiro.</p>
+  </div>
+  <div class="acoes">
+    <% if (pode('entregas:editar')) { %><a class="btn btn-primario" href="/entregas/nova"><svg class="i i-p"><use href="#ic-mais"/></svg>Nova entrega</a><% } %>
+  </div>
+</div>
+
+<section class="cartao">
+  <header>
+    <form method="get" action="/entregas" class="barra-filtro largura-total">
+      <select name="status" aria-label="Filtrar por status">
+        <option value="">Todos os status</option>
+        <% d.STATUS_ENTREGA.forEach(function (s) { %>
+          <option value="<%= s %>" <%= status === s ? 'selected' : '' %>><%= d.ROTULO_STATUS_ENTREGA[s] %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="btn">Filtrar</button>
+      <% if (status) { %><a class="btn" href="/entregas">Limpar filtro</a><% } %>
+    </form>
+  </header>
+
+  <% if (!entregas.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-entregas"/></svg>
+      <b><%= status ? 'Nenhuma entrega com esse status' : 'Nenhuma entrega registrada' %></b>
+      <p>
+        <%= status
+            ? 'Troque o filtro para ver as outras entregas.'
+            : 'Marque um pedido como Pronto para criar a primeira entrega.' %>
+      </p>
+      <% if (pode('entregas:editar') && !status) { %><a class="btn btn-primario" href="/entregas/nova">Criar entrega</a><% } %>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr>
+          <th>Cliente e endereço</th>
+          <th>Entrega</th>
+          <th>Data prevista</th>
+          <th>Veículo e motorista</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% entregas.forEach(function (e) { %>
+        <tr class="<%= e.atrasada ? 'linha-atrasada' : '' %>">
+          <td class="destaque">
+            <span class="celula">
+              <a href="/entregas/<%= e.id %>"><%= e.cliente %></a>
+              <small><%= e.endereco %></small>
+            </span>
+          </td>
+          <td data-rotulo="Entrega" class="compacto">
+            <span class="celula">
+              <a href="/entregas/<%= e.id %>">#<%= e.id %></a>
+              <small>Pedido <a href="/pedidos/<%= e.pedido_id %>">#<%= e.pedido_id %></a></small>
+            </span>
+          </td>
+          <td data-rotulo="Data prevista" class="compacto">
+            <%= f.data(e.data_prevista) %>
+            <% if (e.atrasada) { %><span class="tag tag-atraso">Atrasada</span><% } %>
+          </td>
+          <td data-rotulo="Veículo">
+            <span class="celula">
+              <span><%= e.placa || 'Veículo a definir' %></span>
+              <small><%= e.motorista || 'Motorista a definir' %></small>
+            </span>
+          </td>
+          <td data-rotulo="Status">
+            <span class="celula">
+              <span><span class="tag tag-<%= e.status %>"><%= d.ROTULO_STATUS_ENTREGA[e.status] %></span></span>
+              <% if (e.ocorrencias > 0) { %>
+                <small><%= e.ocorrencias %> <%= e.ocorrencias === 1 ? 'ocorrência registrada' : 'ocorrências registradas' %></small>
+              <% } %>
+            </span>
+          </td>
+          <td class="acao compacto"><a class="btn btn-pequeno" href="/entregas/<%= e.id %>">Abrir entrega</a></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/paginacao') %>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

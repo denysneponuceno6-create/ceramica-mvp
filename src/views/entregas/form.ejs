@@ -1,0 +1,74 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Logística</p>
+    <h1>Nova entrega</h1>
+    <p class="subtitulo">Só aparecem aqui os pedidos com status Pronto ou Em rota.</p>
+  </div>
+  <div class="acoes"><a class="btn" href="/entregas">Voltar para entregas</a></div>
+</div>
+
+<% if (!pedidos.length) { %>
+  <div class="aviso aviso-atencao">
+    <svg class="i"><use href="#ic-atencao"/></svg>
+    <span class="texto-aviso">
+      Nenhum pedido está aguardando entrega no momento.
+      Marque um pedido como Pronto para liberá-lo aqui. <a href="/pedidos?status=em_producao">Ver pedidos em produção</a>
+    </span>
+  </div>
+<% } %>
+
+<section class="cartao">
+  <div class="corpo">
+    <form method="post" action="/entregas">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="campos">
+        <div class="campo largo">
+          <label for="pedido_id">Pedido</label>
+          <select id="pedido_id" name="pedido_id" required data-preenche-endereco>
+            <option value="">Selecione o pedido</option>
+            <% pedidos.forEach(function (p) { %>
+              <option value="<%= p.id %>"
+                      data-endereco="<%= p.endereco %>"
+                      data-data="<%= f.dataInput(p.data_entrega) %>"
+                      <%= String(entrega.pedido_id) === String(p.id) ? 'selected' : '' %>>
+                #<%= p.id %> &middot; <%= p.cliente %> &middot; prevista para <%= f.data(p.data_entrega) %>
+              </option>
+            <% }) %>
+          </select>
+          <span class="ajuda">Ao escolher o pedido, o endereço e a data são preenchidos automaticamente.</span>
+        </div>
+        <div class="campo">
+          <label for="veiculo_id">Veículo <span class="ajuda">pode definir depois</span></label>
+          <select id="veiculo_id" name="veiculo_id">
+            <option value="">A definir</option>
+            <% veiculos.forEach(function (v) { %>
+              <option value="<%= v.id %>" <%= String(entrega.veiculo_id) === String(v.id) ? 'selected' : '' %>>
+                <%= v.placa %> &middot; <%= v.modelo %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="motorista">Motorista <span class="ajuda">pode definir depois</span></label>
+          <input type="text" id="motorista" name="motorista" value="<%= entrega.motorista || '' %>" maxlength="120" placeholder="Nome de quem vai dirigir">
+        </div>
+        <div class="campo">
+          <label for="data_prevista">Data prevista</label>
+          <input type="date" id="data_prevista" name="data_prevista" value="<%= f.dataInput(entrega.data_prevista) || f.hoje() %>" required>
+        </div>
+        <div class="campo largo">
+          <label for="endereco">Endereço de entrega</label>
+          <input type="text" id="endereco" name="endereco" value="<%= entrega.endereco || '' %>" required minlength="5" maxlength="255" placeholder="Rua, número, bairro e cidade">
+        </div>
+      </div>
+      <div class="acoes-form">
+        <button type="submit" class="btn btn-primario" data-carregando="Criando entrega...">Criar entrega</button>
+        <a class="btn" href="/entregas">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<%- include('../partials/rodape') %>

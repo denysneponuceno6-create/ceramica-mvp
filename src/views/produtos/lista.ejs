@@ -1,0 +1,57 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Cadastro</p>
+    <h1>Produtos</h1>
+    <p class="subtitulo">Tijolos e materiais que a cerâmica vende.</p>
+  </div>
+  <div class="acoes">
+    <% if (pode('produtos:editar')) { %><a class="btn btn-primario" href="/produtos/novo"><svg class="i i-p"><use href="#ic-mais"/></svg>Novo produto</a><% } %>
+  </div>
+</div>
+
+<section class="cartao">
+  <% if (!produtos.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-produtos"/></svg>
+      <b>Nenhum produto cadastrado</b>
+      <p>Cadastre os produtos para poder criar pedidos e controlar o estoque.</p>
+      <% if (pode('produtos:editar')) { %><a class="btn btn-primario" href="/produtos/novo">Cadastrar produto</a><% } %>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Unidade</th>
+          <th class="num">Preço</th>
+          <th class="num">Saldo</th>
+          <th class="num">Estoque mínimo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% produtos.forEach(function (p) { %>
+        <tr>
+          <td class="destaque">
+            <%= p.nome %><% if (!p.ativo) { %> <span class="tag tag-inativo">Inativo</span><% } %>
+          </td>
+          <td data-rotulo="Unidade"><%= p.unidade %></td>
+          <td data-rotulo="Preço" class="num"><%= f.dinheiro(p.preco) %></td>
+          <td data-rotulo="Saldo" class="num"><%= f.numero(p.saldo) %></td>
+          <td data-rotulo="Estoque mínimo" class="num"><%= f.numero(p.minimo) %></td>
+          <td class="acao compacto">
+            <% if (pode('produtos:editar')) { %><a class="btn btn-pequeno" href="/produtos/<%= p.id %>/editar">Editar produto</a><% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/paginacao') %>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

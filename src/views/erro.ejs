@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#100E0D">
+<title><%= titulo %> &middot; Cerâmica Betim</title>
+<link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/app.css?v=<%= typeof v !== 'undefined' ? v : 1 %>">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <main class="tela-erro">
+    <div class="codigo"><%= codigo %></div>
+    <h1><%= titulo %></h1>
+    <p><%= mensagem %></p>
+    <div class="grupo-botoes centralizado">
+      <a class="btn btn-primario" href="/">Ir para o painel</a>
+      <a class="btn" href="/login">Entrar novamente</a>
+    </div>
+  </main>
+</body>
+</html>

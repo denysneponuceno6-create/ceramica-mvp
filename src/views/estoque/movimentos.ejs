@@ -1,0 +1,56 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Almoxarifado</p>
+    <h1>Movimentações de estoque</h1>
+    <p class="subtitulo">Histórico completo de entradas, saídas e ajustes.</p>
+  </div>
+  <div class="acoes"><a class="btn" href="/estoque">Voltar para o estoque</a></div>
+</div>
+
+<section class="cartao">
+  <% if (!movimentos.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-estoque"/></svg>
+      <b>Nenhuma movimentação registrada</b>
+      <p>Assim que houver produção ou baixa de pedido, o histórico aparece aqui.</p>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Data e hora</th>
+          <th>Tipo</th>
+          <th class="num">Quantidade</th>
+          <th>Origem</th>
+          <th>Motivo</th>
+          <th>Responsável</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% movimentos.forEach(function (m) { %>
+        <tr>
+          <td class="destaque"><%= m.produto %></td>
+          <td data-rotulo="Data e hora" class="compacto"><%= f.dataHora(m.criado_em) %></td>
+          <td data-rotulo="Tipo"><span class="tag tag-<%= m.tipo %>"><%= d.ROTULO_MOVIMENTO[m.tipo] || m.tipo %></span></td>
+          <td data-rotulo="Quantidade" class="num"><%= f.numero(m.quantidade) %></td>
+          <td data-rotulo="Origem"><%= m.origem %></td>
+          <td data-rotulo="Motivo">
+            <%= m.motivo || 'Não informado' %><% if (m.pedido_id) { %>
+              <a href="/pedidos/<%= m.pedido_id %>">Pedido #<%= m.pedido_id %></a>
+            <% } %>
+          </td>
+          <td data-rotulo="Responsável"><%= m.usuario || 'sistema' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/paginacao') %>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>

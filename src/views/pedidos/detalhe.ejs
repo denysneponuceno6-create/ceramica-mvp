@@ -1,0 +1,204 @@
+<%- include('../partials/cabeca') %>
+
+<%
+  var linkTelPedido = f.ligar(pedido.telefone);
+  var rotuloAcao = {
+    confirmado: 'Confirmar pedido',
+    em_producao: 'Enviar para produção',
+    pronto: 'Marcar como pronto',
+    em_rota: 'Colocar em rota',
+    entregue: 'Confirmar entrega',
+  };
+%>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Pedido #<%= pedido.id %></p>
+    <h1><%= pedido.cliente %></h1>
+    <p class="subtitulo">
+      Criado em <%= f.data(pedido.data_pedido) %><% if (pedido.criado_por) { %> por <%= pedido.criado_por %><% } %>
+    </p>
+  </div>
+  <div class="acoes">
+    <a class="btn" href="/clientes/<%= pedido.cliente_id %>">Ver cliente</a>
+    <a class="btn" href="/pedidos">Voltar para pedidos</a>
+  </div>
+</div>
+
+<section class="cartao">
+  <header>
+    <div class="cresce">
+      <h2>Situação: <%= d.ROTULO_STATUS_PEDIDO[pedido.status] %></h2>
+      <%- include('../partials/trilha', { status: pedido.status }) %>
+    </div>
+    <div class="acoes"><span class="tag tag-g tag-<%= pedido.status %>"><%= d.ROTULO_STATUS_PEDIDO[pedido.status] %></span></div>
+  </header>
+  <div class="corpo">
+    <div class="dados">
+      <div class="dado">
+        <div class="rotulo">Entrega prevista</div>
+        <div class="valor"><%= f.data(pedido.data_entrega) %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Valor total</div>
+        <div class="valor"><%= f.dinheiro(pedido.valor_total) %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Baixa de estoque</div>
+        <div class="valor"><%= pedido.estoque_baixado ? 'Já realizada' : 'Ainda não realizada' %></div>
+      </div>
+      <div class="dado">
+        <div class="rotulo">Telefone do cliente</div>
+        <div class="valor">
+          <div class="contato">
+            <span><%= f.telefone(pedido.telefone) %></span>
+            <% if (linkTelPedido) { %>
+              <a class="btn btn-pequeno" href="<%= linkTelPedido %>"><svg class="i i-p"><use href="#ic-telefone"/></svg>Ligar</a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="dado largo">
+        <div class="rotulo">Endereço de entrega</div>
+        <div class="valor"><%= pedido.endereco %></div>
+      </div>
+      <% if (pedido.observacao) { %>
+      <div class="dado largo">
+        <div class="rotulo">Observação</div>
+        <div class="valor"><%= pedido.observacao %></div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (transicoes.length) { %>
+    <div class="corpo">
+      <% if (pedido.status === 'em_producao' || pedido.status === 'confirmado') { %>
+        <p class="subtitulo" class="margem-abaixo">
+          Ao marcar como Pronto, o sistema dá baixa no estoque dos itens listados abaixo.
+        </p>
+      <% } %>
+      <div class="grupo-botoes">
+        <% transicoes.forEach(function (destino) { %>
+          <form method="post" action="/pedidos/<%= pedido.id %>/status">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <input type="hidden" name="status" value="<%= destino %>">
+            <button type="submit"
+                    class="btn <%= destino === 'cancelado' ? 'btn-perigo' : 'btn-primario' %>"
+                    data-carregando="Atualizando..."
+                    <% if (destino === 'cancelado') { %>data-confirmar="Cancelar o pedido #<%= pedido.id %>? Essa ação não pode ser desfeita."<% } %>>
+              <%= destino === 'cancelado' ? 'Cancelar pedido' : (rotuloAcao[destino] || ('Marcar como ' + d.ROTULO_STATUS_PEDIDO[destino])) %>
+            </button>
+          </form>
+        <% }) %>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="corpo">
+      <p class="subtitulo sem-margem">
+        <% if (pedido.status === 'entregue') { %>
+          Pedido finalizado. Não há mais ações a fazer.
+        <% } else if (pedido.status === 'cancelado') { %>
+          Pedido cancelado. Não há mais ações a fazer.
+        <% } else { %>
+          Nenhuma ação disponível para o seu perfil neste status.
+        <% } %>
+      </p>
+    </div>
+  <% } %>
+</section>
+
+<section class="cartao">
+  <header><h2>Itens do pedido</h2></header>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th class="num">Quantidade</th>
+          <th class="num">Preço unitário</th>
+          <th class="num">Subtotal</th>
+          <th class="num">Saldo em estoque</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% itens.forEach(function (i) { %>
+        <tr>
+          <td class="destaque">
+            <span class="celula">
+              <span><%= i.nome %></span>
+              <small>Unidade: <%= i.unidade %></small>
+            </span>
+          </td>
+          <td data-rotulo="Quantidade" class="num"><%= f.numero(i.quantidade) %></td>
+          <td data-rotulo="Preço unitário" class="num"><%= f.dinheiro(i.preco_unitario) %></td>
+          <td data-rotulo="Subtotal" class="num"><%= f.dinheiro(i.quantidade * i.preco_unitario) %></td>
+          <td data-rotulo="Saldo em estoque" class="num">
+            <%= f.numero(i.saldo_estoque) %>
+            <% if (!pedido.estoque_baixado && i.saldo_estoque < i.quantidade) { %>
+              <span class="tag tag-atraso">Insuficiente</span>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="cartao">
+  <header>
+    <h2>Entregas deste pedido</h2>
+    <% if (pode('entregas:editar') && ['pronto','em_rota'].includes(pedido.status) && !entregas.filter(function(e){return e.status !== 'falha';}).length) { %>
+      <div class="acoes"><a class="btn btn-pequeno btn-primario" href="/entregas/nova?pedido=<%= pedido.id %>">Criar entrega</a></div>
+    <% } %>
+  </header>
+  <% if (!entregas.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-entregas"/></svg>
+      <b>Nenhuma entrega vinculada</b>
+      <p>A entrega pode ser criada quando o pedido estiver com status Pronto.</p>
+    </div>
+  <% } else { %>
+  <ul class="lista-simples">
+    <% entregas.forEach(function (e) { %>
+    <li>
+      <div class="principal">
+        <b><a href="/entregas/<%= e.id %>">Entrega #<%= e.id %></a></b>
+        <small>
+          Prevista para <%= f.data(e.data_prevista) %><% if (e.placa) { %> &middot; <%= e.placa %><% } %><% if (e.motorista) { %> &middot; <%= e.motorista %><% } %>
+        </small>
+      </div>
+      <span class="tag tag-<%= e.status %>"><%= d.ROTULO_STATUS_ENTREGA[e.status] %></span>
+      <a class="btn btn-pequeno" href="/entregas/<%= e.id %>">Abrir</a>
+    </li>
+    <% }) %>
+  </ul>
+  <% } %>
+</section>
+
+<% if (pode('pedidos:editar') && !['entregue','cancelado'].includes(pedido.status)) { %>
+<section class="cartao">
+  <header><h2>Ajustar pedido</h2></header>
+  <div class="corpo">
+    <form method="post" action="/pedidos/<%= pedido.id %>/editar">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="campos">
+        <div class="campo">
+          <label for="data_entrega">Data de entrega</label>
+          <input type="date" id="data_entrega" name="data_entrega" value="<%= f.dataInput(pedido.data_entrega) %>" required>
+        </div>
+        <div class="campo largo">
+          <label for="observacao">Observação <span class="ajuda">opcional</span></label>
+          <textarea id="observacao" name="observacao" maxlength="1000" placeholder="Ponto de referência, horário preferido, condições de acesso"><%= pedido.observacao || '' %></textarea>
+        </div>
+      </div>
+      <div class="acoes-form">
+        <button type="submit" class="btn btn-primario" data-carregando="Salvando...">Salvar alterações</button>
+      </div>
+    </form>
+  </div>
+</section>
+<% } %>
+
+<%- include('../partials/rodape') %>

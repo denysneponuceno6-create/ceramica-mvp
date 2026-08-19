@@ -1,0 +1,57 @@
+<%- include('../partials/cabeca') %>
+
+<div class="cabecalho-pagina">
+  <div>
+    <p class="eyebrow">Administração</p>
+    <h1>Auditoria</h1>
+    <p class="subtitulo">Login, pedidos, estoque e entregas com usuário, IP e data.</p>
+  </div>
+</div>
+
+<section class="cartao">
+  <header>
+    <form method="get" action="/auditoria" class="barra-filtro largura-total">
+      <select name="acao" aria-label="Filtrar por ação">
+        <option value="">Todas as ações</option>
+        <% acoes.forEach(function (a) { %>
+          <option value="<%= a.acao %>" <%= acao === a.acao ? 'selected' : '' %>><%= a.acao %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="btn">Filtrar</button>
+      <% if (acao) { %><a class="btn" href="/auditoria">Limpar filtro</a><% } %>
+    </form>
+  </header>
+
+  <% if (!registros.length) { %>
+    <div class="vazio">
+      <svg class="i"><use href="#ic-auditoria"/></svg>
+      <b>Nenhum registro encontrado</b>
+      <p>Troque o filtro para ver outras ações registradas.</p>
+    </div>
+  <% } else { %>
+  <div class="tabela-rolagem">
+    <table class="responsiva">
+      <thead>
+        <tr><th>Usuário</th><th>Data e hora</th><th>Ação</th><th>Registro</th><th>Detalhe</th><th>IP</th></tr>
+      </thead>
+      <tbody>
+        <% registros.forEach(function (r) { %>
+        <tr>
+          <td class="destaque"><%= r.usuario_nome %></td>
+          <td data-rotulo="Data e hora" class="compacto"><%= f.dataHora(r.criado_em) %></td>
+          <td data-rotulo="Ação"><span class="tag <%= r.acao === 'login_falha' ? 'tag-atraso' : 'tag-neutro' %>"><%= r.acao %></span></td>
+          <td data-rotulo="Registro" class="compacto">
+            <%= r.entidade || '-' %><% if (r.entidade_id) { %> <span class="mono">#<%= r.entidade_id %></span><% } %>
+          </td>
+          <td data-rotulo="Detalhe"><%= r.detalhe || '-' %></td>
+          <td data-rotulo="IP" class="mono"><%= r.ip || '-' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/paginacao') %>
+  <% } %>
+</section>
+
+<%- include('../partials/rodape') %>
